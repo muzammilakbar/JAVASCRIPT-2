@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shopping Cart</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fff5f0, #fdf0ec);
+      margin: 0;
+      padding: 30px;
+      color: #3c3c3c;
+    }
+
+    h2 {
+      color: #b3202a;
+      margin-bottom: 15px;
+      font-size: 22px;
+      letter-spacing: 0.5px;
+    }
+
+    /* PRODUCT SECTION */
+    .product {
+      background-color: #ffffff;
+      border: 1px solid #f2d6d0;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .product:hover {
+      transform: scale(1.01);
+      box-shadow: 0 4px 10px rgba(179, 32, 42, 0.15);
+    }
+
+    .product span {
+      font-size: 15px;
+      font-weight: 500;
+      color: #222;
+    }
+
+    .product button {
+      background-color: #b3202a;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .product button:hover {
+      background-color: #8e1b23;
+      transform: scale(1.05);
+    }
+
+    /* CART TABLE */
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.07);
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #f4dada;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #ffe9e5;
+      font-weight: bold;
+      color: #b3202a;
+    }
+
+    tfoot td {
+      font-weight: bold;
+      background-color: #fff5f3;
+      font-size: 15px;
+      color: #8e1b23;
+    }
+
+    button.remove-btn {
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 7px 11px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button.remove-btn:hover {
+      background-color: #e84141;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🛍️ Product List</h2>
+  <div id="product-list"></div>
+
+  <h2>🧾 Cart</h2>
+  <table id="cart-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Subtotal</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="cart-body"></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3">Total</td>
+        <td colspan="2" id="total-price">Rs 0</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <script>
+    const products = [
+      { name: "Wireless Mouse", price: 1200 },
+      { name: "Keyboard", price: 1800 },
+      { name: "USB Flash Drive", price: 700 },
+      { name: "Headphones", price: 2500 }
+    ];
+
+    const cart = [];
+
+    const productList = document.getElementById("product-list");
+    products.forEach(product => {
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `
+        <span>${product.name} — Rs ${product.price}</span>
+        <button onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
+      `;
+      productList.appendChild(div);
+    });
+
+    function addToCart(itemName, price) {
+      try {
+        if (!itemName || price <= 0 || isNaN(price)) {
+          throw new Error("Invalid item or price.");
+        }
+
+        const existingItem = cart.find(item => item.name === itemName);
+        if (existingItem) {
+          existingItem.qty += 1;
+        } else {
+          cart.push({ name: itemName, price: price, qty: 1 });
+        }
+
+        renderCart();
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartBody = document.getElementById("cart-body");
+      cartBody.innerHTML = "";
+
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const subtotal = item.price * item.qty;
+        total += subtotal;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.name}</td>
+          <td>Rs ${item.price}</td>
+          <td>${item.qty}</td>
+          <td>Rs ${subtotal}</td>
+          <td><button class="remove-btn" onclick="removeFromCart(${index})">Remove</button></td>
+        `;
+        cartBody.appendChild(row);
+      });
+
+      document.getElementById("total-price").textContent = "Rs " + total;
+    }
+  </script>
+
+</body>
+</html>

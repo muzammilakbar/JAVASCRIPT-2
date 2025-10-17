@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Interface</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fff5f0, #fdf0ec);
+      padding: 30px;
+      color: #333;
+    }
+
+    .chat-container {
+      max-width: 520px;
+      margin: auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 25px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #b3202a;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+    }
+
+    .chat-box {
+      height: 320px;
+      overflow-y: auto;
+      border: 1px solid #f2d6d0;
+      padding: 12px;
+      margin-bottom: 15px;
+      background-color: #fff9f8;
+      border-radius: 10px;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px 16px;
+      border-radius: 20px;
+      max-width: 75%;
+      clear: both;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+
+    .user {
+      background-color: #ffd9d6;
+      color: #8e1b23;
+      float: right;
+      text-align: right;
+      box-shadow: 0 2px 4px rgba(179, 32, 42, 0.15);
+    }
+
+    .bot {
+      background-color: #f4dede;
+      color: #3c3c3c;
+      float: left;
+      text-align: left;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #f2d6d0;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #b3202a;
+      box-shadow: 0 0 5px rgba(179, 32, 42, 0.2);
+    }
+
+    button {
+      padding: 10px 18px;
+      background-color: #b3202a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #8e1b23;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-container">
+    <h2>💬 Chat with Bot</h2>
+    <div class="chat-box" id="chat-box"></div>
+
+    <div class="input-area">
+      <input type="text" id="message-input" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    function Message(text, sender) {
+      this.text = text;
+      this.sender = sender;
+    }
+
+    const messages = [];
+
+    function sendMessage() {
+      const input = document.getElementById("message-input");
+      const text = input.value.trim();
+
+      try {
+        if (!text) throw new Error("Message cannot be empty.");
+
+        const userMsg = new Message(text, "User");
+        messages.push(userMsg);
+        appendMessage(userMsg);
+
+        input.value = "";
+
+        // Simulate bot reply with random friendly responses
+        setTimeout(() => {
+          const botReplies = [
+            "Interesting! Tell me more about that. 😊",
+            "Got it! Let me think about that 🤔",
+            "Hmm, that sounds cool! 👏",
+            "Okay, noted. What else would you like to share?",
+            "Thanks for telling me! ❤️",
+            "I see! Want to explain it a bit more?",
+            "That's awesome 😄",
+            "Oh, nice point! Let’s chat about it!"
+          ];
+
+          const randomReply = botReplies[Math.floor(Math.random() * botReplies.length)];
+          const reply = new Message(randomReply, "Bot");
+          messages.push(reply);
+          appendMessage(reply);
+        }, 800);
+
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    function appendMessage(msg) {
+      const chatBox = document.getElementById("chat-box");
+      const div = document.createElement("div");
+      div.classList.add("message");
+      if (msg.sender === "User") {
+        div.classList.add("user");
+      } else {
+        div.classList.add("bot");
+      }
+
+      div.textContent = msg.text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>

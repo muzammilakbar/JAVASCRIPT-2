@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Tracker</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e9f9f9, #f6fbff);
+      padding: 30px;
+      color: #333;
+    }
+
+    h2 {
+      color: #008c9e;
+      margin-bottom: 15px;
+    }
+
+    .container {
+      background: #fff;
+      max-width: 650px;
+      margin: auto;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #006974;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 9px 12px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #b3e0e6;
+      transition: border-color 0.3s ease;
+      font-size: 14px;
+    }
+
+    input:focus, select:focus {
+      border-color: #00a7b3;
+      outline: none;
+      box-shadow: 0 0 6px rgba(0,167,179,0.3);
+    }
+
+    button {
+      padding: 9px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 10px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    #addBtn { background-color: #00a7b3; color: #fff; }
+    #resetBtn { background-color: #e74c3c; color: #fff; }
+    #filterBtn { background-color: #f0b90b; color: #333; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #d7eef0;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #c9f1f3;
+      color: #006974;
+    }
+
+    td button {
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    td button:hover {
+      background-color: #e84141;
+    }
+
+    #total {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #008c9e;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>💰 Expense Tracker</h2>
+
+    <form id="expenseForm">
+      <label>Description:</label>
+      <input type="text" id="desc" placeholder="Enter expense description">
+
+      <label>Amount:</label>
+      <input type="text" id="amount" placeholder="Enter amount">
+
+      <label>Category:</label>
+      <select id="category">
+        <option value="">-- Select Category --</option>
+        <option value="Food">Food</option>
+        <option value="Transport">Transport</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Utilities">Utilities</option>
+      </select>
+
+      <button type="button" id="addBtn" onclick="addExpense()">Add Expense</button>
+      <button type="button" id="filterBtn" onclick="filterByCategory()">Filter</button>
+      <button type="button" id="resetBtn" onclick="resetAll()">Reset</button>
+    </form>
+
+    <table id="expenseTable">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <p id="total">Total: Rs 0</p>
+  </div>
+
+  <script>
+    // Constructor Function
+    function Expense(description, amount, category) {
+      this.description = description;
+      this.amount = parseFloat(amount);
+      this.category = category;
+    }
+
+    // Add method via prototype
+    Expense.prototype.display = function() {
+      return `${this.description} - Rs ${this.amount} (${this.category})`;
+    };
+
+    const expenses = [];
+
+    // Add Expense
+    function addExpense() {
+      try {
+        const desc = document.getElementById("desc").value.trim();
+        const amount = document.getElementById("amount").value.trim();
+        const category = document.getElementById("category").value;
+
+        // Validation
+        if (!desc || !amount || !category) throw new Error("All fields are required.");
+        if (isNaN(amount) || parseFloat(amount) <= 0) throw new Error("Amount must be a valid number.");
+
+        const newExpense = new Expense(desc, amount, category);
+        expenses.push(newExpense);
+
+        displayExpenses(expenses);
+        clearFields();
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    // Display Table
+    function displayExpenses(list) {
+      const tbody = document.querySelector("#expenseTable tbody");
+      tbody.innerHTML = "";
+
+      list.forEach((exp, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${exp.description}</td>
+          <td>Rs ${exp.amount}</td>
+          <td>${exp.category}</td>
+          <td><button onclick="deleteExpense(${index})">Delete</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      updateTotal(list);
+    }
+
+    // Delete Expense
+    function deleteExpense(index) {
+      expenses.splice(index, 1);
+      displayExpenses(expenses);
+    }
+
+    // Update Total
+    function updateTotal(list) {
+      const total = list.reduce((sum, exp) => sum + exp.amount, 0);
+      document.getElementById("total").textContent = `Total: Rs ${total}`;
+    }
+
+    // Filter by Category
+    function filterByCategory() {
+      const selected = prompt("Enter category to filter (Food / Transport / Entertainment / Utilities):");
+      if (!selected) {
+        displayExpenses(expenses);
+        return;
+      }
+
+      const filtered = expenses.filter(exp => exp.category.toLowerCase() === selected.toLowerCase());
+      if (filtered.length === 0) alert("No records found for this category.");
+      displayExpenses(filtered);
+    }
+
+    // Reset All
+    function resetAll() {
+      if (confirm("Clear all data?")) {
+        expenses.length = 0;
+        displayExpenses(expenses);
+      }
+    }
+
+    // Clear input fields
+    function clearFields() {
+      document.getElementById("desc").value = "";
+      document.getElementById("amount").value = "";
+      document.getElementById("category").value = "";
+    }
+  </script>
+
+</body>
+</html>

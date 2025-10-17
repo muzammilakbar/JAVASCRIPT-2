@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic Form Builder</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e9f9f9, #f6fbff);
+      padding: 30px;
+      color: #333;
+    }
+
+    h2 {
+      color: #008c9e;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+    }
+
+    button {
+      margin-right: 10px;
+      padding: 9px 15px;
+      border: none;
+      background-color: #00a7b3;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #008c9e;
+      transform: scale(1.05);
+    }
+
+    .form-area {
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      max-width: 520px;
+      margin-top: 10px;
+    }
+
+    .form-field {
+      margin-bottom: 18px;
+    }
+
+    .form-field label {
+      display: block;
+      margin-bottom: 6px;
+      color: #005c6e;
+      font-weight: 500;
+    }
+
+    .form-field input, .form-field select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #b3e0e6;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s ease, box-shadow 0.2s ease;
+    }
+
+    .form-field input:focus, .form-field select:focus {
+      outline: none;
+      border-color: #00a7b3;
+      box-shadow: 0 0 6px rgba(0,167,179,0.3);
+    }
+
+    .error {
+      border-color: #e74c3c !important;
+      background-color: #ffeaea;
+    }
+
+    .success {
+      border-color: #27ae60;
+    }
+
+    form button[type="submit"] {
+      display: block;
+      margin-top: 10px;
+      background-color: #00a7b3;
+      border-radius: 6px;
+      width: 100%;
+    }
+
+    form button[type="submit"]:hover {
+      background-color: #008c9e;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🧩 Dynamic Form Builder</h2>
+
+  <div class="controls">
+    <button onclick="addField('text')">Add Text Field</button>
+    <button onclick="addField('email')">Add Email Field</button>
+    <button onclick="addField('dropdown')">Add Dropdown</button>
+  </div>
+
+  <form id="dynamic-form" class="form-area">
+    <!-- Dynamic fields will be inserted here -->
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("dynamic-form");
+
+    // Add field dynamically
+    function addField(type) {
+      const fieldWrapper = document.createElement("div");
+      fieldWrapper.className = "form-field";
+
+      switch (type) {
+        case "text":
+          fieldWrapper.innerHTML = '<label>Text Field:</label><input type="text" name="text">';
+          break;
+        case "email":
+          fieldWrapper.innerHTML = '<label>Email Field:</label><input type="email" name="email">';
+          break;
+        case "dropdown":
+          fieldWrapper.innerHTML = `
+            <label>Dropdown:</label>
+            <select name="dropdown">
+              <option value="">-- Select --</option>
+              <option value="Option 1">Option 1</option>
+              <option value="Option 2">Option 2</option>
+            </select>`;
+          break;
+        default:
+          alert("Unknown field type.");
+      }
+
+      form.insertBefore(fieldWrapper, form.lastElementChild);
+    }
+
+    // Validate form
+    form.onsubmit = function(e) {
+      e.preventDefault();
+      let isValid = true;
+      const fields = form.querySelectorAll("input, select");
+
+      for (let field of fields) {
+        field.classList.remove("error");
+
+        try {
+          switch (field.type) {
+            case "text":
+              if (field.value.trim() === "") throw "Text field cannot be empty.";
+              break;
+            case "email":
+              const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+              if (!emailRegex.test(field.value)) throw "Invalid email format.";
+              break;
+            case "select-one":
+              if (field.value === "") throw "Please select a dropdown option.";
+              break;
+          }
+        } catch (err) {
+          isValid = false;
+          field.classList.add("error");
+          alert("Validation Error: " + err);
+        }
+      }
+
+      if (isValid) {
+        alert("✅ Form submitted successfully!");
+        form.reset();
+      }
+    };
+  </script>
+
+</body>
+</html>
